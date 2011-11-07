@@ -10,6 +10,7 @@
     <setting id="password" type="text" enable="eq(-2,true)" option="hidden" label="30402" default="" />
     <setting type="sep" />
     <setting id="highBitrate" type="bool" enable="eq(-4,true)" label="30404" default="true" />
+    <setting id="normalization" type="bool" enable="eq(-5,true)" label="30409" default="true" />
     <setting id="enablefanart" type="bool" enable="eq(-5,true)"  label="30407" default="true" />
     <setting id="customfanart" type="bool" enable="eq(-1,true)" visible="eq(-1,true)" label="30408" default="false" />
     <setting id="fanart" type="file" enable="eq(-1,true)" visible="eq(-1,true)" label="30406" default="" />
@@ -31,7 +32,7 @@
     <setting id="preloadToplists" type="bool" label="30434" default="false" />
   </category>
   <category label="30440">
-    <setting id="radio1name" type="text" label="30441" default="Rock"/>
+    <setting id="radio1name" type="text" label="30440" default="Rock"/>
     <setting id="radio1from" type="enum" label="30460" values="Older|50s|60s|70s|80s|90s|00s|10s" default="3" />
     <setting id="radio1to" type="enum" label="30461" values="Older|50s|60s|70s|80s|90s|00s|10s" default="7" />
     <setting id="radio1genre1" type="bool" label="30443" default="false" />
@@ -49,8 +50,10 @@
     <setting id="radio1genre13" type="bool" label="30455" default="false" />
     <setting id="radio1genre14" type="bool" label="30456" default="false" />
     <setting id="radio1genre15" type="bool" label="30457" default="false" />
-    <setting id="radio1genre17" type="bool" label="30458" default="false" />
-    <setting id="radio1genre18" type="bool" label="30459" default="false" />
+    <setting id="radio1genre16" type="bool" label="30458" default="false" />
+    <setting id="radio1genre17" type="bool" label="30459" default="false" />
+    <setting id="radio1genre18" type="bool" label="30462" default="false" />
+
 </category>
   <category label="30441">
     <setting id="radio2name" type="text" label="30441" default="Dance"/>
@@ -71,7 +74,8 @@
     <setting id="radio2genre13" type="bool" label="30455" default="false" />
     <setting id="radio2genre14" type="bool" label="30456" default="false" />
     <setting id="radio2genre15" type="bool" label="30457" default="false" />
-    <setting id="radio2genre17" type="bool" label="30458" default="false" />
-    <setting id="radio2genre18" type="bool" label="30459" default="true" />
+    <setting id="radio2genre16" type="bool" label="30458" default="false" />
+    <setting id="radio2genre17" type="bool" label="30459" default="false" />
+    <setting id="radio2genre18" type="bool" label="30462" default="false" />
 </category>
 </settings>
