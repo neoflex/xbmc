@@ -620,7 +620,10 @@ MediaLibrary.prototype = {
 		},
 		
 		playTVShow: function(event) {
-      jQuery.post(JSON_RPC + '?AddTvShowToPlaylist', '{"jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "episodeid": ' + event.data.episode.episodeid + ' } }, "id": 1}', jQuery.proxy(function(data) {
+     			 //jQuery.get("http://192.168.1.93/MainZone/index.put.asp?cmd0=PutSystem_OnStandby/ON", function(data) {
+        		//	 jQuery.get("http://192.168.1.93/QuickSelect/index.put.asp?cmd0=PutUserMode/Quick2");
+      			//});
+			jQuery.post(JSON_RPC + '?AddTvShowToPlaylist', '{"jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "episodeid": ' + event.data.episode.episodeid + ' } }, "id": 1}', jQuery.proxy(function(data) {
         this.hideOverlay();
       }, this), 'json');
 		},
@@ -653,7 +656,10 @@ MediaLibrary.prototype = {
 			}
 		},
 		playMovie: function(event) {
-			jQuery.post(JSON_RPC + '?PlayMovie', '{"jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "movieid": ' + event.data.movie.movieid + ' } }, "id": 1}', jQuery.proxy(function(data) {
+		//jQuery.get("http://192.168.1.93/MainZone/index.put.asp?cmd0=PutSystem_OnStandby/ON", function(data) {
+                  //               jQuery.get("http://192.168.1.93/QuickSelect/index.put.asp?cmd0=PutUserMode/Quick2");
+                    //    }); 
+		jQuery.post(JSON_RPC + '?PlayMovie', '{"jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "movieid": ' + event.data.movie.movieid + ' } }, "id": 1}', jQuery.proxy(function(data) {
 				this.hideOverlay();
 			}, this), 'json');
 		},
@@ -687,6 +693,9 @@ MediaLibrary.prototype = {
 			this.updatePlayButtonLocation();
 		},
 		playTrack: function(event) {
+		//	jQuery.get("http://192.168.1.93/MainZone/index.put.asp?cmd0=PutSystem_OnStandby/ON", function(data) {
+                  //               jQuery.get("http://192.168.1.93/QuickSelect/index.put.asp?cmd0=PutUserMode/Quick2");
+                    //    }); 
 			if(event.data.album.albumid != undefined) {
 				s_albumid = event.data.album.albumid;
 				p_album_id = '"albumid" : ' + event.data.album.albumid;

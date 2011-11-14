@@ -34,6 +34,7 @@
 #include "VideoLibrary.h"
 #include "video/VideoDatabase.h"
 #include "AudioLibrary.h"
+#include "filesystem/FileCurl.h"
 
 using namespace JSONRPC;
 using namespace PLAYLIST;
@@ -432,6 +433,12 @@ JSON_STATUS CPlayerOperations::Rotate(const CStdString &method, ITransportLayer 
 
 JSON_STATUS CPlayerOperations::Open(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
+  XFILE::CFileCurl avcurl;
+  CStdString resulthtml=" ";
+  CStdString urlon="http://192.168.1.93/MainZone/index.put.asp?cmd0=PutSystem_OnStandby/ON";
+  CStdString urlsource="http://192.168.1.93/QuickSelect/index.put.asp?cmd0=PutUserMode/Quick2";
+  avcurl.Get(urlon, resulthtml);
+  avcurl.Get(urlsource, resulthtml);
   if (parameterObject["item"].isObject() && parameterObject["item"].isMember("playlistid"))
   {
     int playlistid = (int)parameterObject["item"]["playlistid"].asInteger();

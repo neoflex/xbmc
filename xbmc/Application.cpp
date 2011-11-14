@@ -4243,7 +4243,6 @@ bool CApplication::ToggleDPMS(bool manual)
 
 bool CApplication::WakeUpScreenSaverAndDPMS()
 {
-
 #ifdef HAS_LCD
     // turn on lcd backlight
     if (g_lcd && g_advancedSettings.m_lcdDimOnScreenSave)
@@ -4293,7 +4292,12 @@ bool CApplication::WakeUpScreenSaver()
     m_bScreenSave = false;
     m_iScreenSaveLock = 0;
     ResetScreenSaverTimer();
-
+    XFILE::CFileCurl avcurl;
+    CStdString resulthtml=" ";
+    CStdString urlon="http://192.168.1.93/MainZone/index.put.asp?cmd0=PutSystem_OnStandby/ON";
+    CStdString urlsource="http://192.168.1.93/QuickSelect/index.put.asp?cmd0=PutUserMode/Quick2";
+    avcurl.Get(urlon, resulthtml);
+    avcurl.Get(urlsource, resulthtml);
     CAnnouncementManager::Announce(GUI, "xbmc", "OnScreensaverDeactivated");
 
     if (m_screenSaver->ID() == "visualization" || m_screenSaver->ID() == "screensaver.xbmc.builtin.slideshow")
