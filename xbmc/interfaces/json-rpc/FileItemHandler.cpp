@@ -86,6 +86,26 @@ void CFileItemHandler::FillDetails(ISerializable* info, CFileItemPtr item, const
 
         continue;
       }
+
+      if (item->HasVideoInfoTag() && item->GetVideoContentType() == VIDEODB_CONTENT_TVSHOWS)
+      {
+        if (item->GetVideoInfoTag()->m_iSeason < 0 && field == "season")
+        {
+          result[field] = (int)item->GetProperty("totalseasons").asInteger();
+          continue;
+        }
+        if (field == "watchedepisodes")
+        {
+          result[field] = (int)item->GetProperty("watchedepisodes").asInteger();
+          continue;
+        }
+      }
+
+      if (field == "lastmodified" && item->m_dateTime.IsValid())
+      {
+        result[field] = item->m_dateTime.GetAsLocalizedDateTime();
+        continue;
+      }
     }
 
     if (serialization.isMember(field) && !result.isMember(field))
@@ -220,6 +240,8 @@ void CFileItemHandler::HandleFileItem(const char *ID, bool allowFile, const char
         object["thumbnail"] = "";
     }
 
+    FillDetails(item.get(), item, validFields, object);
+
     if (item->HasVideoInfoTag())
       FillDetails(item->GetVideoInfoTag(), item, validFields, object);
     if (item->HasMusicInfoTag())
@@ -311,10 +333,14 @@ bool CFileItemHandler::ParseSortMethods(const CStdString &method, const bool &ig
     sortmethod = ignorethe ? SORT_METHOD_ALBUM_IGNORE_THE : SORT_METHOD_ALBUM;
   else if (method.Equals("genre"))
     sortmethod = SORT_METHOD_GENRE;
+  else if (method.Equals("country"))
+    sortmethod = SORT_METHOD_COUNTRY;
   else if (method.Equals("year"))
     sortmethod = SORT_METHOD_YEAR;
   else if (method.Equals("videorating"))
     sortmethod = SORT_METHOD_VIDEO_RATING;
+  else if (method.Equals("dateadded"))
+    sortmethod = SORT_METHOD_DATEADDED;
   else if (method.Equals("programcount"))
     sortmethod = SORT_METHOD_PROGRAM_COUNT;
   else if (method.Equals("playlist"))
@@ -341,8 +367,12 @@ bool CFileItemHandler::ParseSortMethods(const CStdString &method, const bool &ig
     sortmethod = SORT_METHOD_LASTPLAYED;
   else if (method.Equals("playcount"))
     sortmethod = SORT_METHOD_PLAYCOUNT;
+  else if (method.Equals("listeners"))
+    sortmethod = SORT_METHOD_LISTENERS;
   else if (method.Equals("unsorted"))
     sortmethod = SORT_METHOD_UNSORTED;
+  else if (method.Equals("bitrate"))
+    sortmethod = SORT_METHOD_BITRATE;
   else
     return false;
 

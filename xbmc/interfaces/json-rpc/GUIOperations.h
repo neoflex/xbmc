@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2011 Team XBMC
+ *      Copyright (C) 2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,38 +20,19 @@
  *
  */
 
-#include "IAnnouncer.h"
+#include "JSONRPC.h"
+#include "utils/StdString.h"
 
-namespace ANNOUNCEMENT
+namespace JSONRPC
 {
-  class CAnnouncementUtils
+  class CGUIOperations
   {
   public:
-    /*!
-     \brief Returns a string representation for the 
-     given EAnnouncementFlag
-     \param notification Specific EAnnouncementFlag
-     \return String representation of the given EAnnouncementFlag
-     */
-    static inline const char *AnnouncementFlagToString(const EAnnouncementFlag &notification)
-    {
-      switch (notification)
-      {
-      case Player:
-        return "Player";
-      case GUI:
-        return "GUI";
-      case System:
-        return "System";
-      case VideoLibrary:
-        return "VideoLibrary";
-      case AudioLibrary:
-        return "AudioLibrary";
-      case Other:
-        return "Other";
-      default:
-        return "Unknown";
-      }
-    }
+    static JSONRPC_STATUS GetProperties(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result);
+
+    static JSONRPC_STATUS ShowNotification(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result);
+    static JSONRPC_STATUS SetFullscreen(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result);
+  private:
+    static JSONRPC_STATUS GetPropertyValue(const CStdString &property, CVariant &result);
   };
 }
