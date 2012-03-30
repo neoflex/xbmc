@@ -101,7 +101,8 @@ namespace addon_music_spotify {
     outSong.iDuration = track->getDuration();
     outSong.rating = track->getRating();
     char ratingChar[3];
-    CStdString ratingStr = itoa(1 + (track->getRating() / 2), ratingChar, 10);
+    CStdString ratingStr; //= itoa(1 + (track->getRating() / 2), ratingChar, 10);
+    ratingStr.Format("%i", 1 + (track->getRating() / 2), ratingChar, 10);
     //delete ratingChar;
     outSong.rating = ratingStr[0];
     outSong.strArtist = track->getArtistName();
