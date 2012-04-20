@@ -38,6 +38,7 @@ MediaLibrary.prototype = {
     $('#tvshowLibrary').click(jQuery.proxy(this.tvshowLibraryOpen, this));
     $('#pictureLibrary').click(jQuery.proxy(this.pictureLibraryOpen, this));
     $('#remoteControl').click(jQuery.proxy(this.remoteControlOpen, this));
+    $('#denonControl').click(jQuery.proxy(this.denonControlOpen, this));
     $('#overlay').click(jQuery.proxy(this.hideOverlay, this));
     $(window).resize(jQuery.proxy(this.updatePlayButtonLocation, this));
   },
@@ -46,6 +47,7 @@ MediaLibrary.prototype = {
     $('#movieLibrary').removeClass('selected');
     $('#tvshowLibrary').removeClass('selected');
     $('#remoteControl').removeClass('selected');
+    $('#denonControl').removeClass('selected');
     $('#pictureLibrary').removeClass('selected');
     this.hideOverlay();
   },
@@ -85,6 +87,26 @@ MediaLibrary.prototype = {
       }, this),
       dataType: 'json'});
   },
+  denonControlOpen: function(event) {
+    this.resetPage();
+    $('#denonControl').addClass('selected');
+    $('.contentContainer').hide();
+     var libraryContainer = $('#denonContainer');
+      if (!libraryContainer || libraryContainer.length == 0) {
+      	$('#spinner').show();
+      	libraryContainer = $('<div>');
+      	libraryContainer.attr('id', 'denonContainer')
+              .addClass('contentContainer');
+      	$('#content').append(libraryContainer);
+      	var content = '<iframe id="denonFrame" src="http://192.168.1.93/MainZone/index.html" />';
+      	libraryContainer.append(content);
+      }  
+      else {
+       libraryContainer.show();
+       libraryContainer.trigger('scroll');
+      }
+   $('#spinner').hide();
+},
   remoteControlOpen: function(event) {
     this.resetPage();
     $('#remoteControl').addClass('selected');
@@ -598,7 +620,10 @@ MediaLibrary.prototype = {
   },
 
   playTVShow: function(event) {
-    jQuery.post(JSON_RPC + '?AddTvShowToPlaylist', '{"jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "episodeid": ' + event.data.episode.episodeid + ' } }, "id": 1}', jQuery.proxy(function(data) {
+   jQuery.get("http://192.168.1.93/MainZone/index.put.asp?cmd0=PutSystem_OnStandby/ON", function(data) {
+    jQuery.get("http://192.168.1.93/QuickSelect/index.put.asp?cmd0=PutUserMode/Quick2");
+   });
+  jQuery.post(JSON_RPC + '?AddTvShowToPlaylist', '{"jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "episodeid": ' + event.data.episode.episodeid + ' } }, "id": 1}', jQuery.proxy(function(data) {
       this.hideOverlay();
     }, this), 'json');
   },
@@ -631,6 +656,10 @@ MediaLibrary.prototype = {
     }
   },
   playMovie: function(event) {
+     jQuery.get("http://192.168.1.93/MainZone/index.put.asp?cmd0=PutSystem_OnStandby/ON", function(data) {
+      jQuery.get("http://192.168.1.93/QuickSelect/index.put.asp?cmd0=PutUserMode/Quick2");
+     }); 
+
     jQuery.post(JSON_RPC + '?PlayMovie', '{"jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "movieid": ' + event.data.movie.movieid + ' } }, "id": 1}', jQuery.proxy(function(data) {
       this.hideOverlay();
     }, this), 'json');
@@ -665,6 +694,9 @@ MediaLibrary.prototype = {
     this.updatePlayButtonLocation();
   },
   playTrack: function(event) {
+       jQuery.get("http://192.168.1.93/MainZone/index.put.asp?cmd0=PutSystem_OnStandby/ON", function(data) {
+       jQuery.get("http://192.168.1.93/QuickSelect/index.put.asp?cmd0=PutUserMode/Quick2");
+      }); 
      if(event.data.album.albumid != undefined) {
        s_albumid = event.data.album.albumid;
        p_album_id = '"albumid" : ' + event.data.album.albumid;

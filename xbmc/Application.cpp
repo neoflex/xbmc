@@ -756,7 +756,7 @@ bool CApplication::Create()
   // Configure and possible manually start the helper.
   XBMCHelper::GetInstance().Configure();
 #endif
-
+  bool bFullScreen = false;
   if (!g_application.IsServerMode())
   {
     // update the window resolution
@@ -768,14 +768,13 @@ bool CApplication::Create()
 #ifdef TARGET_DARWIN_OSX
   // force initial window creation to be windowed, if fullscreen, it will switch to it below
   // fixes the white screen of death if starting fullscreen and switching to windowed.
-  bool bFullScreen = false;
   if (!g_Windowing.CreateNewWindow("XBMC", bFullScreen, g_settings.m_ResInfo[RES_WINDOW], OnEvent))
   {
     CLog::Log(LOGFATAL, "CApplication::Create: Unable to create window");
     return false;
   }
 #else
-  bool bFullScreen = g_guiSettings.m_LookAndFeelResolution != RES_WINDOW;
+  bFullScreen = g_guiSettings.m_LookAndFeelResolution != RES_WINDOW;
   if (!g_Windowing.CreateNewWindow("XBMC", bFullScreen, g_settings.m_ResInfo[g_guiSettings.m_LookAndFeelResolution], OnEvent))
   {
     CLog::Log(LOGFATAL, "CApplication::Create: Unable to create window");

@@ -19,6 +19,10 @@ body {
 	margin: auto;
 	margin-top: 50px;
 }
+#denonFrame {
+        height:100%;
+        width:100%;
+}
 .remote_key {
 	cursor:pointer;
 	position:absolute;
