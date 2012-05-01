@@ -253,7 +253,9 @@ NowPlayingManager.prototype = {
           if (!this.activePlaylistItem || this.playlistChanged(data.result.items) || (this.activePlaylistItem && (this.activePlaylistItem.seq != this.currentItem))) {
             var ul = $('<ul>');
             var activeItem;
+            var nbitems = 0;
             $.each($(data.result.items), jQuery.proxy(function(i, item) {
+              nbitems++;
               var li = $('<li>');
               var code = '<span class="duration">' + durationToString(item.duration) + '</span><div class="trackInfo" title="' + item.title + ' - ' + item.artist + '"><span class="trackTitle">' + item.title + '</span> - <span class="trackArtist">' + item.artist + '</span></div>';
               if (i == this.currentItem) {
@@ -272,6 +274,11 @@ NowPlayingManager.prototype = {
                 $('#nextTrack').html('<div class="trackInfo">Last track in playlist</div>').show();
               }
               $('#nextText').show();
+              var dtop = -16*nbitems;
+	      var dheight = -1 * dtop - 10;
+              $('#nowPlayingPlaylist').css('height',dheight+"px");
+              $('#nowPlayingPlaylist').css('top',dtop+"px");
+ 
               $('#nowPlayingPlaylist').html('').append(ul);
             } else {
               $('#nextText').hide();

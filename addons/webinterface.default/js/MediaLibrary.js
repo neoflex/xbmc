@@ -78,7 +78,7 @@ MediaLibrary.prototype = {
         if (data && data.result && data.result.length > 0) {
           $.each($(data.result), jQuery.proxy(function(i, item) {
             this.playlists[item.type] = item.playlistid;
-          }, this));
+	     }, this));
         }
       }, this),
       error: jQuery.proxy(function(data, error) {
@@ -199,20 +199,22 @@ MediaLibrary.prototype = {
         jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "System.Shutdown", "id": 1}', function(data){$('#spinner').hide();}, 'json');
         return;
       case 'volumeup':
-      jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": [ "volume" ] }, "id": 1}', function(data){
-        var volume = data.result.volume + 1;
-        jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "Application.SetVolume", "params": { "volume": '+volume+' }, "id": 1}', function(data){
+	jQuery.get("http://192.168.1.93/MainZone/index.put.asp?cmd0=PutMasterVolumeBtn/%3E");
+//jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": [ "volume" ] }, "id": 1}', function(data){
+//        var volume = data.result.volume + 1;
+//        jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "Application.SetVolume", "params": { "volume": '+volume+' }, "id": 1}', function(data){
           $('#spinner').hide();
-        }, 'json');
-       }, 'json');
+//        }, 'json');
+ //      }, 'json');
         return;
       case 'volumedown':
-        jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": [ "volume" ] }, "id": 1}', function(data){
-          var volume = data.result.volume - 1;
-          jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "Application.SetVolume", "params": { "volume": '+volume+' }, "id": 1}', function(data){
+     jQuery.get("http://192.168.1.93/MainZone/index.put.asp?cmd0=PutMasterVolumeBtn/%3C");
+    // jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "Application.GetProperties", "params": { "properties": [ "volume" ] }, "id": 1}', function(data){
+    //      var volume = data.result.volume - 1;
+    //      jQuery.post(JSON_RPC + '?SendRemoteKey', '{"jsonrpc": "2.0", "method": "Application.SetVolume", "params": { "volume": '+volume+' }, "id": 1}', function(data){
             $('#spinner').hide();
-          }, 'json');
-       }, 'json');
+    //      }, 'json');
+    //   }, 'json');
         return;
     }
 
