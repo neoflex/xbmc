@@ -19,7 +19,6 @@
  *
  */
 
-#include "music/spotyXBMC/Addon.music.spotify.h"
 #include "PlaylistOperations.h"
 #include "playlists/PlayList.h"
 #include "PlayListPlayer.h"

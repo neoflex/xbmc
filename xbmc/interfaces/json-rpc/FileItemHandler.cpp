@@ -19,7 +19,6 @@
  *
  */
 
-#include <iostream>
 #include <string.h>
 #include "music/spotyXBMC/Logger.h"
 #include "FileItemHandler.h"
