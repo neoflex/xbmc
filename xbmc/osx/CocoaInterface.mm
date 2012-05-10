@@ -40,7 +40,6 @@
 
 #import "AutoPool.h"
 
-#import "CoreAudio.h"
 
 // hack for Cocoa_GL_ResizeWindow
 //extern "C" void SDL_SetWidthHeight(int w, int h);
@@ -182,18 +181,12 @@ double Cocoa_GetCVDisplayLinkRefreshPeriod(void)
   }
   else
   {
-    // NOTE: The refresh rate will be REPORTED AS 0 for many DVI and notebook displays.
-    CGDirectDisplayID display_id;
-    CFDictionaryRef mode;
-  
-    display_id = (CGDirectDisplayID)Cocoa_GL_GetCurrentDisplayID();
-    mode = CGDisplayCurrentMode(display_id);
-    if (mode)
-    {
-      CFNumberGetValue( (CFNumberRef)CFDictionaryGetValue(mode, kCGDisplayRefreshRate), kCFNumberDoubleType, &fps);
-      if (fps <= 0.0)
-        fps = 60.0;
-    }
+    CGDisplayModeRef display_mode;
+    display_mode = (CGDisplayModeRef)Cocoa_GL_GetCurrentDisplayID();
+    fps = CGDisplayModeGetRefreshRate(display_mode);
+    CGDisplayModeRelease(display_mode);
+    if (fps <= 0.0)
+      fps = 60.0;
   }
   
   return(fps);
@@ -624,52 +617,6 @@ const char *Cocoa_Paste()
   }
   
   return NULL;
-}
-
-void Cocoa_ResetAudioDevices()
-{
-  // Reset any devices with an AC3/DTS/SPDIF stream back to a Linear PCM
-  // so that they can become a default output device
-  CoreAudioDeviceList deviceList;
-  CCoreAudioHardware::GetOutputDevices(&deviceList);
-  for (CoreAudioDeviceList::iterator d = deviceList.begin(); d != deviceList.end(); d++)
-  {
-    CCoreAudioDevice device(*d);
-    AudioStreamIdList streamList;
-    if (device.GetStreams(&streamList))
-    {
-      for (AudioStreamIdList::iterator s = streamList.begin(); s != streamList.end(); s++)
-      {
-        CCoreAudioStream stream;
-        if (stream.Open(*s))
-        {
-          AudioStreamBasicDescription currentFormat;
-          if (stream.GetPhysicalFormat(&currentFormat))
-          {
-            if (currentFormat.mFormatID == 'IAC3' || currentFormat.mFormatID == kAudioFormat60958AC3)
-            {
-              StreamFormatList formatList;
-              if (stream.GetAvailablePhysicalFormats(&formatList))
-              {
-                for (StreamFormatList::iterator f = formatList.begin(); f != formatList.end(); f++)
-                {
-                  if ((*f).mFormat.mFormatID == kAudioFormatLinearPCM)
-                  {
-                    if (stream.SetPhysicalFormat(&(*f).mFormat))
-                    {
-                      sleep(1);
-                      break;
-                    }
-                  }
-                }
-              }
-            }              
-          }
-          stream.Close();
-        }
-      }
-    }
-  }  
 }
 
 #endif

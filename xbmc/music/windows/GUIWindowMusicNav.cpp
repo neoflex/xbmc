@@ -34,13 +34,13 @@
 #include "PartyModeManager.h"
 #include "playlists/PlayList.h"
 #include "playlists/PlayListFactory.h"
-#include "music/dialogs/GUIDialogMusicScan.h"
 #include "video/VideoDatabase.h"
 #include "video/windows/GUIWindowVideoNav.h"
 #include "music/tags/MusicInfoTag.h"
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogKeyboard.h"
+#include "dialogs/GUIDialogYesNo.h"
 #include "guilib/GUIEditControl.h"
 #include "GUIUserMessages.h"
 #include "filesystem/File.h"
@@ -415,7 +415,6 @@ void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &butt
 {
   CGUIWindowMusicBase::GetContextButtons(itemNumber, buttons);
 
-  CGUIDialogMusicScan *musicScan = (CGUIDialogMusicScan *)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_SCAN);
   CFileItemPtr item;
   if (itemNumber >= 0 && itemNumber < m_vecItems->Size())
     item = m_vecItems->Get(itemNumber);
@@ -545,9 +544,9 @@ void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &butt
   }
   // noncontextual buttons
 
-  if (musicScan && musicScan->IsScanning())
+  if (g_application.IsMusicScanning())
     buttons.Add(CONTEXT_BUTTON_STOP_SCANNING, 13353);     // Stop Scanning
-  else if (musicScan)
+  else
     buttons.Add(CONTEXT_BUTTON_UPDATE_LIBRARY, 653);
 
   CGUIWindowMusicBase::GetNonContextButtons(buttons);
@@ -654,9 +653,7 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 
   case CONTEXT_BUTTON_UPDATE_LIBRARY:
     {
-      CGUIDialogMusicScan *scanner = (CGUIDialogMusicScan *)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_SCAN);
-      if (scanner)
-        scanner->StartScanning("");
+      g_application.StartMusicScan("");
       return true;
     }
 
@@ -724,7 +721,6 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 
   case CONTEXT_BUTTON_SET_CONTENT:
     {
-      bool bScan=false;
       ADDON::ScraperPtr scraper;
       CStdString path(item->GetPath());
       CQueryParams params;
@@ -752,11 +748,14 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
         }
       }
 
-      if (CGUIDialogContentSettings::Show(scraper, bScan, content))
+      if (CGUIDialogContentSettings::Show(scraper, content))
       {
         m_musicdatabase.SetScraperForPath(path,scraper);
-        if (bScan)
-          OnInfoAll(itemNumber,true);
+        if (CGUIDialogYesNo::ShowAndGetInput(20442,20443,20444,20022))
+        {
+          OnInfoAll(itemNumber,true,true);
+        }
+
       }
       return true;
     }

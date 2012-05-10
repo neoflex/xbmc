@@ -1049,8 +1049,7 @@ void CWinSystemOSX::GetScreenResolution(int* w, int* h, double* fps, int screenI
   // Figure out the screen size. (default to main screen)
   if(screenIdx >= GetNumScreens())
     return;
-  CGDirectDisplayID display_id = GetDisplayID(screenIdx);
-  CFDictionaryRef mode  = CGDisplayCurrentMode(display_id);
+  CGDirectDisplayID display_id = (CGDirectDisplayID)GetDisplayID(screenIdx);
   
   NSOpenGLContext* context = [NSOpenGLContext currentContext];
   if (context)
@@ -1063,16 +1062,14 @@ void CWinSystemOSX::GetScreenResolution(int* w, int* h, double* fps, int screenI
       NSWindow* window;
       window = [view window];
       if (window)
-      {
         display_id = GetDisplayIDFromScreen( [window screen] );      
-        mode  = CGDisplayCurrentMode(display_id);
-      }
     }
   }
-  
-  *w = GetDictionaryInt(mode, kCGDisplayWidth);
-  *h = GetDictionaryInt(mode, kCGDisplayHeight);
-  *fps = GetDictionaryDouble(mode, kCGDisplayRefreshRate);
+  CGDisplayModeRef mode  = CGDisplayCopyDisplayMode(display_id);  
+  *w = CGDisplayModeGetWidth(mode); 
+  *h = CGDisplayModeGetHeight(mode);
+  *fps = CGDisplayModeGetRefreshRate(mode);
+  CGDisplayModeRelease(mode);
   if ((int)*fps == 0)
   {
     // NOTE: The refresh rate will be REPORTED AS 0 for many DVI and notebook displays.
@@ -1083,11 +1080,7 @@ void CWinSystemOSX::GetScreenResolution(int* w, int* h, double* fps, int screenI
 void CWinSystemOSX::EnableVSync(bool enable)
 {
   // OpenGL Flush synchronised with vertical retrace                       
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
   GLint swapInterval = enable ? 1 : 0;
-#else 
-  const long int swapInterval = enable ? 1 : 0;
-#endif
   [[NSOpenGLContext currentContext] setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
 }
 
@@ -1284,37 +1277,6 @@ void CWinSystemOSX::OnMove(int x, int y)
 
 void CWinSystemOSX::EnableSystemScreenSaver(bool bEnable)
 {
-#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1050)
-  // static games because NSTimer is an object-c class and we cannot
-  // forward declare nor include NSTimer.h in WinSystemOSX.h
-  static NSTimer *display_tickle;
-
-  if (bEnable)
-  {
-    if (display_tickle != NULL)
-    {
-      [display_tickle invalidate];
-      [display_tickle release];
-      display_tickle = NULL;
-    }
-  }
-  else
-  {
-    if (display_tickle == NULL)
-    {
-      // NSTimer will retain the target until it is released,
-      //  so we do not worry about retaining/releasing it.
-      windowInhibitScreenSaverClass *inhibitScreenSaver;
-      inhibitScreenSaver = [[[windowInhibitScreenSaverClass alloc] init] autorelease];
-      // schedule every 30 seconds
-      display_tickle = [NSTimer scheduledTimerWithTimeInterval:30.0  
-        target:inhibitScreenSaver selector:@selector(updateSystemActivity:) userInfo:nil repeats:YES]; 
-      [display_tickle retain];
-    }
-  }
-  m_use_system_screensaver = (display_tickle == NULL);
-#else
-  // only present in 10.5 SDK and above
   // kIOPMAssertionTypeNoDisplaySleep prevents display idle sleep
   static IOPMAssertionID assertionID = 0;
 
@@ -1324,7 +1286,6 @@ void CWinSystemOSX::EnableSystemScreenSaver(bool bEnable)
     IOPMAssertionRelease(assertionID);
 
   m_use_system_screensaver = bEnable;
-#endif
 }
 
 bool CWinSystemOSX::IsSystemScreenSaverEnabled()
@@ -1396,6 +1357,11 @@ void CWinSystemOSX::CheckDisplayChanging(u_int32_t flags)
         (*i)->OnResetDevice();
     }
   }
+}
+
+void* CWinSystemOSX::GetCGLContextObj()
+{
+  return [(NSOpenGLContext*)m_glContext CGLContextObj];
 }
 
 #endif
