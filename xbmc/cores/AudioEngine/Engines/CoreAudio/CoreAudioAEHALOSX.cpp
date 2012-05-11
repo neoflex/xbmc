@@ -19,80 +19,81 @@
  *
  */
 
-#ifndef __arm__
+#ifdef TARGET_DARWIN_OSX
+
+#include "system.h"
+
 #include "CoreAudioAEHALOSX.h"
 
-#include <PlatformDefs.h>
-#include <math.h>
-#include "utils/log.h"
-#include "utils/TimeUtils.h"
-#include "system.h"
-#include "CoreAudioAE.h"
 #include "AEUtil.h"
-#include "AEFactory.h"
-#include "utils/SystemInfo.h"
+#include "CoreAudioAE.h"
 #include "settings/GUISettings.h"
-#include "settings/Settings.h"
-#include "settings/AdvancedSettings.h"
+#include "utils/log.h"
+#include "utils/SystemInfo.h"
 
 #include <CoreServices/CoreServices.h>
 
+// AudioHardwareGetProperty and friends are deprecated.
+// turn off the warning spew.
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+
 const char* g_ChannelLabels[] =
 {
-  "Unused", // kAudioChannelLabel_Unused
-  "Left", // kAudioChannelLabel_Left
-  "Right", // kAudioChannelLabel_Right
-  "Center", // kAudioChannelLabel_Center
-  "LFE",  // kAudioChannelLabel_LFEScreen
-  "Side Left", // kAudioChannelLabel_LeftSurround
-  "Side Right", // kAudioChannelLabel_RightSurround
-  "Left Center", // kAudioChannelLabel_LeftCenter
-  "Right Center", // kAudioChannelLabel_RightCenter
-  "Back Center", // kAudioChannelLabel_CenterSurround
-  "Back Left", // kAudioChannelLabel_LeftSurroundDirect
-  "Back Right", // kAudioChannelLabel_RightSurroundDirect
-  "Top Center", // kAudioChannelLabel_TopCenterSurround
-  "Top Back Left", // kAudioChannelLabel_VerticalHeightLeft
-  "Top Back Center", // kAudioChannelLabel_VerticalHeightCenter
-  "Top Back Right", // kAudioChannelLabel_VerticalHeightRight
+  "Unused",           // kAudioChannelLabel_Unused
+  "Left",             // kAudioChannelLabel_Left
+  "Right",            // kAudioChannelLabel_Right
+  "Center",           // kAudioChannelLabel_Center
+  "LFE",              // kAudioChannelLabel_LFEScreen
+  "Side Left",        // kAudioChannelLabel_LeftSurround
+  "Side Right",       // kAudioChannelLabel_RightSurround
+  "Left Center",      // kAudioChannelLabel_LeftCenter
+  "Right Center",     // kAudioChannelLabel_RightCenter
+  "Back Center",      // kAudioChannelLabel_CenterSurround
+  "Back Left",        // kAudioChannelLabel_LeftSurroundDirect
+  "Back Right",       // kAudioChannelLabel_RightSurroundDirect
+  "Top Center",       // kAudioChannelLabel_TopCenterSurround
+  "Top Back Left",    // kAudioChannelLabel_VerticalHeightLeft
+  "Top Back Center",  // kAudioChannelLabel_VerticalHeightCenter
+  "Top Back Right",   // kAudioChannelLabel_VerticalHeightRight
 };
 
 const AudioChannelLabel g_LabelMap[] =
 {
-  kAudioChannelLabel_Unused, // PCM_FRONT_LEFT,
-  kAudioChannelLabel_Left, // PCM_FRONT_LEFT,
-  kAudioChannelLabel_Right, //  PCM_FRONT_RIGHT,
-  kAudioChannelLabel_Center, //  PCM_FRONT_CENTER,
-  kAudioChannelLabel_LFEScreen, //  PCM_LOW_FREQUENCY,
-  kAudioChannelLabel_LeftSurroundDirect, //  PCM_BACK_LEFT, *** This is incorrect, but has been changed to match dvdplayer
-  kAudioChannelLabel_RightSurroundDirect, //  PCM_BACK_RIGHT, *** This is incorrect, but has been changed to match dvdplayer
-  kAudioChannelLabel_LeftCenter, //  PCM_FRONT_LEFT_OF_CENTER,
-  kAudioChannelLabel_RightCenter, //  PCM_FRONT_RIGHT_OF_CENTER,
-  kAudioChannelLabel_CenterSurround, //  PCM_BACK_CENTER,
-  kAudioChannelLabel_LeftSurround, //  PCM_SIDE_LEFT, *** This is incorrect, but has been changed to match dvdplayer
-  kAudioChannelLabel_RightSurround, //  PCM_SIDE_RIGHT, *** This is incorrect, but has been changed to match dvdplayer
-  kAudioChannelLabel_VerticalHeightLeft, //  PCM_TOP_FRONT_LEFT,
-  kAudioChannelLabel_VerticalHeightRight, //  PCM_TOP_FRONT_RIGHT,
-  kAudioChannelLabel_VerticalHeightCenter, //  PCM_TOP_FRONT_CENTER,
-  kAudioChannelLabel_TopCenterSurround, //  PCM_TOP_CENTER,
-  kAudioChannelLabel_TopBackLeft, //  PCM_TOP_BACK_LEFT,
-  kAudioChannelLabel_TopBackRight, //  PCM_TOP_BACK_RIGHT,
-  kAudioChannelLabel_TopBackCenter //  PCM_TOP_BACK_CENTER
+  kAudioChannelLabel_Unused,                // PCM_FRONT_LEFT,
+  kAudioChannelLabel_Left,                  // PCM_FRONT_LEFT,
+  kAudioChannelLabel_Right,                 // PCM_FRONT_RIGHT,
+  kAudioChannelLabel_Center,                // PCM_FRONT_CENTER,
+  kAudioChannelLabel_LFEScreen,             // PCM_LOW_FREQUENCY,
+  kAudioChannelLabel_LeftSurroundDirect,    // PCM_BACK_LEFT, *** This is incorrect, but has been changed to match dvdplayer
+  kAudioChannelLabel_RightSurroundDirect,   // PCM_BACK_RIGHT, *** This is incorrect, but has been changed to match dvdplayer
+  kAudioChannelLabel_LeftCenter,            // PCM_FRONT_LEFT_OF_CENTER,
+  kAudioChannelLabel_RightCenter,           // PCM_FRONT_RIGHT_OF_CENTER,
+  kAudioChannelLabel_CenterSurround,        // PCM_BACK_CENTER,
+  kAudioChannelLabel_LeftSurround,          // PCM_SIDE_LEFT, *** This is incorrect, but has been changed to match dvdplayer
+  kAudioChannelLabel_RightSurround,         // PCM_SIDE_RIGHT, *** This is incorrect, but has been changed to match dvdplayer
+  kAudioChannelLabel_VerticalHeightLeft,    // PCM_TOP_FRONT_LEFT,
+  kAudioChannelLabel_VerticalHeightRight,   // PCM_TOP_FRONT_RIGHT,
+  kAudioChannelLabel_VerticalHeightCenter,  // PCM_TOP_FRONT_CENTER,
+  kAudioChannelLabel_TopCenterSurround,     // PCM_TOP_CENTER,
+  kAudioChannelLabel_TopBackLeft,           // PCM_TOP_BACK_LEFT,
+  kAudioChannelLabel_TopBackRight,          // PCM_TOP_BACK_RIGHT,
+  kAudioChannelLabel_TopBackCenter          // PCM_TOP_BACK_CENTER
 };
 
 const AudioChannelLayoutTag g_LayoutMap[] =
 {
-  kAudioChannelLayoutTag_Stereo, // PCM_LAYOUT_2_0 = 0,
-  kAudioChannelLayoutTag_Stereo, // PCM_LAYOUT_2_0 = 0,
-  kAudioChannelLayoutTag_DVD_4, // PCM_LAYOUT_2_1,
-  kAudioChannelLayoutTag_MPEG_3_0_A, // PCM_LAYOUT_3_0,
-  kAudioChannelLayoutTag_DVD_10, // PCM_LAYOUT_3_1,
-  kAudioChannelLayoutTag_DVD_3, // PCM_LAYOUT_4_0,
-  kAudioChannelLayoutTag_DVD_6, // PCM_LAYOUT_4_1,
-  kAudioChannelLayoutTag_MPEG_5_0_A, // PCM_LAYOUT_5_0,
-  kAudioChannelLayoutTag_MPEG_5_1_A, // PCM_LAYOUT_5_1,
+  kAudioChannelLayoutTag_Stereo,        // PCM_LAYOUT_2_0 = 0,
+  kAudioChannelLayoutTag_Stereo,        // PCM_LAYOUT_2_0 = 0,
+  kAudioChannelLayoutTag_DVD_4,         // PCM_LAYOUT_2_1,
+  kAudioChannelLayoutTag_MPEG_3_0_A,    // PCM_LAYOUT_3_0,
+  kAudioChannelLayoutTag_DVD_10,        // PCM_LAYOUT_3_1,
+  kAudioChannelLayoutTag_DVD_3,         // PCM_LAYOUT_4_0,
+  kAudioChannelLayoutTag_DVD_6,         // PCM_LAYOUT_4_1,
+  kAudioChannelLayoutTag_MPEG_5_0_A,    // PCM_LAYOUT_5_0,
+  kAudioChannelLayoutTag_MPEG_5_1_A,    // PCM_LAYOUT_5_1,
   kAudioChannelLayoutTag_AudioUnit_7_0, // PCM_LAYOUT_7_0, ** This layout may be incorrect...no content to testß˚ **
-  kAudioChannelLayoutTag_MPEG_7_1_A, // PCM_LAYOUT_7_1
+  kAudioChannelLayoutTag_MPEG_7_1_A,    // PCM_LAYOUT_7_1
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -657,7 +658,7 @@ UInt32 CCoreAudioDevice::GetTotalOutputChannels()
       "Unable to get total device output channels - id: 0x%04x. Error = %s",
       (uint)m_DeviceId, GetError(ret).c_str());
   CLog::Log(LOGDEBUG, "CCoreAudioDevice::GetTotalOutputChannels: "
-    "Found %u channels in %u buffers", (uint)channels, pList->mNumberBuffers);
+    "Found %u channels in %u buffers", (uint)channels, (uint)pList->mNumberBuffers);
   free(pList);
   return channels;
 }

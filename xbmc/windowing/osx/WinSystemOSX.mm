@@ -46,7 +46,11 @@
 #import <QuartzCore/QuartzCore.h>
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #import <IOKit/graphics/IOGraphicsLib.h>
+
 #import <Carbon/Carbon.h>   // ShowMenuBar, HideMenuBar
+
+// turn off deprecated warning spew.
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 //------------------------------------------------------------------------------------------
 // special object-c class for handling the inhibit display NSTimer callback.
@@ -398,7 +402,7 @@ void fadeOutDisplay(NSScreen *theScreen, double fadeTime)
 // non interlaced, nonstretched, safe for hardware
 CFDictionaryRef GetMode(int width, int height, double refreshrate, int screenIdx)
 {
-  if( screenIdx >= (signed)[[NSScreen screens] count])
+  if ( screenIdx >= (signed)[[NSScreen screens] count])
     return NULL;
     
   Boolean stretched;
@@ -433,19 +437,19 @@ CFDictionaryRef GetMode(int width, int height, double refreshrate, int screenIdx
     rate = GetDictionaryDouble(displayMode, kCGDisplayRefreshRate);
 
 
-    if( (bitsperpixel == 32)      && 
+    if ((bitsperpixel == 32)      && 
         (safeForHardware == YES)  && 
         (stretched == NO)         && 
         (interlaced == NO)        &&
         (w == width)              &&
         (h == height)             &&
-        (rate == refreshrate || rate == 0)      )
+        (rate == refreshrate || rate == 0))
     {
-      CLog::Log(LOGDEBUG, "GetMode found a match!");    
+      CLog::Log(LOGDEBUG, "GetMode found a match!");
       return displayMode;
     }
   }
-  CLog::Log(LOGERROR, "GetMode - no match found!");  
+  CLog::Log(LOGERROR, "GetMode - no match found!");
   return NULL;
 }
 
@@ -464,7 +468,7 @@ static void DisplayReconfigured(CGDirectDisplayID display,
     NSScreen* pScreen = nil;
     unsigned int screenIdx = g_settings.m_ResInfo[res].iScreen;
     
-    if( screenIdx < [[NSScreen screens] count] )
+    if ( screenIdx < [[NSScreen screens] count] )
     {
         pScreen = [[NSScreen screens] objectAtIndex:screenIdx];
     }
@@ -700,7 +704,7 @@ bool CWinSystemOSX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool bl
     return false;
   }
 
-  if(windowedFullScreenwindow != NULL)
+  if (windowedFullScreenwindow != NULL)
   {
     [windowedFullScreenwindow close];
     if ([windowedFullScreenwindow isReleasedWhenClosed] == NO)
@@ -846,7 +850,7 @@ bool CWinSystemOSX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool bl
       [[last_view window] setLevel:NSNormalWindowLevel];
       
       // Get rid of the new window we created.
-      if(windowedFullScreenwindow != NULL)
+      if (windowedFullScreenwindow != NULL)
       {
         [windowedFullScreenwindow close];
         if ([windowedFullScreenwindow isReleasedWhenClosed] == NO)
@@ -909,17 +913,17 @@ void CWinSystemOSX::UpdateResolutions()
   int w, h;
   double fps;
 
-  //first screen goes into the current desktop mode
+  // first screen goes into the current desktop mode
   GetScreenResolution(&w, &h, &fps, 0);  
   UpdateDesktopResolution(g_settings.m_ResInfo[RES_DESKTOP], 0, w, h, fps);
   
-  //see resolution.h enum RESOLUTION for how the resolutions
-  //have to appear in the g_settings.m_ResInfo vector
-  //add the desktop resolutions of the other screens
+  // see resolution.h enum RESOLUTION for how the resolutions
+  // have to appear in the g_settings.m_ResInfo vector
+  // add the desktop resolutions of the other screens
   for(int i = 1; i < GetNumScreens(); i++)
   {
     RESOLUTION_INFO res;      
-    //get current resolution of screen i
+    // get current resolution of screen i
     GetScreenResolution(&w, &h, &fps, i);      
     UpdateDesktopResolution(res, i, w, h, fps);
     g_settings.m_ResInfo.push_back(res);
@@ -927,8 +931,8 @@ void CWinSystemOSX::UpdateResolutions()
   
   if (m_can_display_switch)
   {
-    //now just fill in the possible reolutions for the attached screens
-    //and push to the m_ResInfo vector
+    // now just fill in the possible reolutions for the attached screens
+    // and push to the m_ResInfo vector
     FillInVideoModes();
   }
 }
@@ -1047,7 +1051,7 @@ void* CWinSystemOSX::CreateFullScreenContext(int screen_index, void* shareCtx)
 void CWinSystemOSX::GetScreenResolution(int* w, int* h, double* fps, int screenIdx)
 {
   // Figure out the screen size. (default to main screen)
-  if(screenIdx >= GetNumScreens())
+  if (screenIdx >= GetNumScreens())
     return;
   CGDirectDisplayID display_id = (CGDirectDisplayID)GetDisplayID(screenIdx);
   
@@ -1159,10 +1163,10 @@ void CWinSystemOSX::FillInVideoModes()
       safeForHardware = GetDictionaryBoolean(displayMode, kCGDisplayModeIsSafeForHardware);
       televisionoutput = GetDictionaryBoolean(displayMode, kCGDisplayModeIsTelevisionOutput);
 
-      if( (bitsperpixel == 32)      && 
+      if ((bitsperpixel == 32)      && 
           (safeForHardware == YES)  && 
           (stretched == NO)         && 
-          (interlaced == NO)        )
+          (interlaced == NO))
       {
         w = GetDictionaryInt(displayMode, kCGDisplayWidth);
         h = GetDictionaryInt(displayMode, kCGDisplayHeight);      
@@ -1176,16 +1180,16 @@ void CWinSystemOSX::FillInVideoModes()
         
         UpdateDesktopResolution(res, disp, w, h, refreshrate);
 
-        //overwrite the mode str because  UpdateDesktopResolution adds a
-        //"Full Screen". Since the current resolution is there twice
-        //this would lead to 2 identical resolution entrys in the guisettings.xml.
-        //That would cause problems with saving screen overscan calibration
-        //because the wrong entry is picked on load.
-        //So we just use UpdateDesktopResolutions for the current DESKTOP_RESOLUTIONS
-        //in UpdateResolutions. And on all othere resolutions make a unique
-        //mode str by doing it without appending "Full Screen".
-        //this is what linux does - though it feels that there shouldn't be
-        //the same resolution twice... - thats why i add a FIXME here.
+        // overwrite the mode str because  UpdateDesktopResolution adds a
+        // "Full Screen". Since the current resolution is there twice
+        // this would lead to 2 identical resolution entrys in the guisettings.xml.
+        // That would cause problems with saving screen overscan calibration
+        // because the wrong entry is picked on load.
+        // So we just use UpdateDesktopResolutions for the current DESKTOP_RESOLUTIONS
+        // in UpdateResolutions. And on all othere resolutions make a unique
+        // mode str by doing it without appending "Full Screen".
+        // this is what linux does - though it feels that there shouldn't be
+        // the same resolution twice... - thats why i add a FIXME here.
         res.strMode.Format("%dx%d @ %.2f", w, h, refreshrate);
         g_graphicsContext.ResetOverscan(res);
         g_settings.m_ResInfo.push_back(res);
@@ -1277,13 +1281,19 @@ void CWinSystemOSX::OnMove(int x, int y)
 
 void CWinSystemOSX::EnableSystemScreenSaver(bool bEnable)
 {
-  // kIOPMAssertionTypeNoDisplaySleep prevents display idle sleep
+  // see Technical Q&A QA1340
   static IOPMAssertionID assertionID = 0;
 
-  if (bEnable)
-    IOPMAssertionCreate(kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn, &assertionID); 
-  else
+  if (!bEnable)
+  {
+    CFStringRef reasonForActivity= CFSTR("XBMC requested disable system screen saver");
+    IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep,
+      kIOPMAssertionLevelOn, reasonForActivity, &assertionID); 
+  }
+  else if (assertionID != 0)
+  {
     IOPMAssertionRelease(assertionID);
+  }
 
   m_use_system_screensaver = bEnable;
 }
