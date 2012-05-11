@@ -643,8 +643,6 @@ bool CApplication::Create()
 
   if (!g_application.IsServerMode())
   { 
-    #ifdef HAS_SDL
-      CLog::Log(LOGNOTICE, "Setup SDL");
 
 #ifdef HAS_SDL
   CLog::Log(LOGNOTICE, "Setup SDL");
